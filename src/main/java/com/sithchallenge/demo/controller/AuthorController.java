@@ -1,7 +1,11 @@
 package com.sithchallenge.demo.controller;
 
-import com.sithchallenge.demo.DAO.AuthorDAO;
-import com.sithchallenge.demo.model.Author;
+import ch.rasc.sbjooqflyway.db.tables.daos.AuthorDao;
+import ch.rasc.sbjooqflyway.db.tables.pojos.Author;
+import com.sithchallenge.demo.exception.ResourceDuplicateException;
+import com.sithchallenge.demo.exception.ResourceNotFoundException;
+import org.jooq.Configuration;
+import org.jooq.DSLContext;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,11 +15,16 @@ import java.util.logging.Logger;
 @RestController
 public class AuthorController {
 
-    final String endpoint = "/authors";
-    final Logger logger = Logger.getLogger(AuthorController.class.getName());
+    private final String endpoint = "/authors";
+    private final Logger logger = Logger.getLogger(AuthorController.class.getName());
+    private final AuthorDao authorDao;
+
+    public AuthorController(Configuration jooqConfiguration) {
+        this.authorDao = new AuthorDao(jooqConfiguration);
+    }
 
     @GetMapping(endpoint)
-    List<Author> allAuthors(){
+    public List<Author> allAuthors(){
         logger.log(Level.INFO, "GET request - endpoint: '" + endpoint + "'");
 
         String methodName = new Object() {}
@@ -25,11 +34,11 @@ public class AuthorController {
 
         logAction(methodName);
 
-        return new AuthorDAO().getAll();
+        return this.authorDao.findAll();
     }
 
     @PostMapping(endpoint)
-    void newAuthor(@RequestBody Author author){
+    public Author newAuthor(@RequestBody Author newAuthor){
         logger.log(Level.INFO, "POST request - endpoint: '" + endpoint + "'");
 
         String methodName = new Object() {}
@@ -39,11 +48,16 @@ public class AuthorController {
 
         logAction(methodName);
 
-        new AuthorDAO().addSingle(author);
+        if(this.authorDao.existsById(newAuthor.getId())){
+            throw new ResourceDuplicateException("Resource with id " + newAuthor.getId() + "is already on database");
+        }
+
+        this.authorDao.insert(newAuthor);
+        return newAuthor;
     }
 
     @GetMapping(endpoint + "/{id}")
-    Author getAuthor(@PathVariable long id){
+    public Author getAuthor(@PathVariable int id){
         logger.log(Level.INFO, "GET request - endpoint: '" + endpoint + "/" + id + "'");
 
         String methodName = new Object() {}
@@ -53,11 +67,17 @@ public class AuthorController {
 
         logAction(methodName);
 
-        return new AuthorDAO().getSingle(id);
+        Author author = this.authorDao.fetchOneById(id);
+
+        if(author == null){
+            throw new ResourceNotFoundException("Couldn't find resource with id " + id);
+        }
+
+        return this.authorDao.fetchOneById(id);
     }
 
     @PutMapping(endpoint + "/{id}")
-    void updateAuthor(@RequestBody Author newAuthor, @PathVariable long id){
+    public Author updateAuthor(@RequestBody Author newAuthor, @PathVariable int id){
         logger.log(Level.INFO, "PUT request - endpoint: '" + endpoint + "/" + id + "'");
 
         String methodName = new Object() {}
@@ -66,12 +86,14 @@ public class AuthorController {
                 .getName();
 
         logAction(methodName);
+        newAuthor.setId(id);
 
-        new AuthorDAO().updateSingle(newAuthor, id);
+        this.authorDao.update(newAuthor);
+        return newAuthor;
     }
 
     @DeleteMapping(endpoint + "/{id}")
-    void deleteAuthor(@PathVariable long id){
+    public void deleteAuthor(@PathVariable int id){
         logger.log(Level.INFO, "DELETE request - endpoint: '" + endpoint + "/" + id + "'");
 
         String methodName = new Object() {}
@@ -81,7 +103,7 @@ public class AuthorController {
 
         logAction(methodName);
 
-        new AuthorDAO().deleteSingle(id);
+        this.authorDao.deleteById(id);
     }
 
     private void logAction(String actionName){
