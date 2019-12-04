@@ -17,11 +17,9 @@ public class AuthorController {
     private final String endpoint = "/authors";
     private final Logger logger = Logger.getLogger(AuthorController.class.getName());
     private final AuthorDao authorDao;
-    private final DSLContext dsl;
 
-    public AuthorController(DSLContext dsl, Configuration jooqConfiguration) {
+    public AuthorController(Configuration jooqConfiguration) {
         this.authorDao = new AuthorDao(jooqConfiguration);
-        this.dsl = dsl;
     }
 
     @GetMapping(endpoint)
