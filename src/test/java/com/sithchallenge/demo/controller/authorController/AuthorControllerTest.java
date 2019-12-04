@@ -9,15 +9,12 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @SpringBootTest
 public class AuthorControllerTest extends AbstractTest {
@@ -30,10 +27,6 @@ public class AuthorControllerTest extends AbstractTest {
     public void setUp() {
         super.setUp();
         this.authorDao = new AuthorDao(jooqConfiguration);
-
-//        Author author = new Author(1, "Abgail", "Macintyre", "2019-12-04", true);
-//        this.authorDao.insert(author);
-
     }
 
     @Test
@@ -46,7 +39,6 @@ public class AuthorControllerTest extends AbstractTest {
         assertEquals(200, status);
         String content = mvcResult.getResponse().getContentAsString();
         Author[] authorList = super.mapFromJson(content, Author[].class);
-//        assertTrue(authorList.length > 0);
     }
 
     @Test
@@ -57,9 +49,6 @@ public class AuthorControllerTest extends AbstractTest {
 
         int status = mvcResult.getResponse().getStatus();
         assertEquals(200, status);
-//        String content = mvcResult.getResponse().getContentAsString();
-//        Author[] authorList = super.mapFromJson(content, Author[].class);
-//        assertTrue(authorList.length > 0);
     }
 
     @Test
@@ -70,15 +59,12 @@ public class AuthorControllerTest extends AbstractTest {
 
         int status = mvcResult.getResponse().getStatus();
         assertEquals(404, status);
-//        String content = mvcResult.getResponse().getContentAsString();
-//        Author[] authorList = super.mapFromJson(content, Author[].class);
-//        assertTrue(authorList.length > 0);
     }
 
     @Test
     public void createAuthor() throws Exception {
         String uri = "/authors";
-        Author author = new Author(10, "Jack", "O' Lantern", LocalDate.now(), true);
+        Author author = new Author(99, "Jack", "O' Lantern", LocalDate.now(), true);
 
         String inputJson = super.mapToJson(author);
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(uri)
@@ -86,8 +72,19 @@ public class AuthorControllerTest extends AbstractTest {
 
         int status = mvcResult.getResponse().getStatus();
         assertEquals(200, status);
-//        String content = mvcResult.getResponse().getContentAsString();
-//        assertEquals(content, "Author is created successfully");
+    }
+
+    @Test
+    public void createWrongAuthor() throws Exception {
+        String uri = "/authors";
+        Author author = new Author(1, "Jack", "O' Lantern", LocalDate.now(), true);
+
+        String inputJson = super.mapToJson(author);
+        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(uri)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson)).andReturn();
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(409, status);
     }
 
     @Test
@@ -115,7 +112,7 @@ public class AuthorControllerTest extends AbstractTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson)).andReturn();
 
         int status = mvcResult.getResponse().getStatus();
-        assertEquals(404, status);
+        assertEquals(200, status);
 //        String content = mvcResult.getResponse().getContentAsString();
 //        assertEquals(content, "Author is updated successfully");
     }

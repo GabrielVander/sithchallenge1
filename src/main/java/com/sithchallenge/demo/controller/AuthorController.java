@@ -2,6 +2,7 @@ package com.sithchallenge.demo.controller;
 
 import ch.rasc.sbjooqflyway.db.tables.daos.AuthorDao;
 import ch.rasc.sbjooqflyway.db.tables.pojos.Author;
+import com.sithchallenge.demo.exception.ResourceDuplicateException;
 import com.sithchallenge.demo.exception.ResourceNotFoundException;
 import org.jooq.Configuration;
 import org.jooq.DSLContext;
@@ -48,7 +49,7 @@ public class AuthorController {
         logAction(methodName);
 
         if(this.authorDao.existsById(newAuthor.getId())){
-
+            throw new ResourceDuplicateException("Resource with id " + newAuthor.getId() + "is already on database");
         }
 
         this.authorDao.insert(newAuthor);
