@@ -1,5 +1,6 @@
 package com.sithchallenge.demo.controller.authorController;
 
+import com.sithchallenge.demo.DAO.AuthorDAO;
 import com.sithchallenge.demo.controller.AbstractTest;
 import com.sithchallenge.demo.model.Author;
 import org.junit.Before;
@@ -20,6 +21,9 @@ public class AuthorControllerTest extends AbstractTest {
     @Override
     @Before
     public void setUp() {
+        Author author = new Author(1L,"Jack", "O' Lantern", new Date(), true);
+        new AuthorDAO().addSingle(author);
+
         super.setUp();
     }
 
@@ -51,7 +55,7 @@ public class AuthorControllerTest extends AbstractTest {
 
     @Test
     public void getWrongAuthor() throws Exception {
-        String uri = "/authors/1";
+        String uri = "/authors/1111111";
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri)
                 .accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 
@@ -65,7 +69,7 @@ public class AuthorControllerTest extends AbstractTest {
     @Test
     public void createAuthor() throws Exception {
         String uri = "/authors";
-        Author author = new Author(1L,"Jack", "O' Lantern", new Date(), true);
+        Author author = new Author(2L,"Jack", "O' Lantern", new Date(), true);
 
         String inputJson = super.mapToJson(author);
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(uri)

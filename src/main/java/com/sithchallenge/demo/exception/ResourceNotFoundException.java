@@ -13,20 +13,9 @@ public class ResourceNotFoundException extends RuntimeException {
 
     private final String defaultMessage = "Resource not found";
 
-    public ResourceNotFoundException() {
-        super();
-        logger.log(Level.SEVERE, defaultMessage);
-    }
-    public ResourceNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-        logger.log(Level.SEVERE, message);
-    }
     public ResourceNotFoundException(String message) {
         super(message);
         logger.log(Level.SEVERE, message);
     }
-    public ResourceNotFoundException(Throwable cause) {
-        super(cause);
-        logger.log(Level.SEVERE, defaultMessage);
-    }
+
 }
