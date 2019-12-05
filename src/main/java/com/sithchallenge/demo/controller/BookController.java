@@ -1,8 +1,7 @@
 package com.sithchallenge.demo.controller;
 
-import ch.rasc.sbjooqflyway.db.tables.daos.AuthorDao;
-import ch.rasc.sbjooqflyway.db.tables.pojos.Author;
-import com.sithchallenge.demo.DAO.AuthorDAO;
+import ch.rasc.sbjooqflyway.db.tables.daos.BookDao;
+import ch.rasc.sbjooqflyway.db.tables.pojos.Book;
 import com.sithchallenge.demo.exception.ResourceDuplicateException;
 import com.sithchallenge.demo.exception.ResourceNotFoundException;
 import org.jooq.Configuration;
@@ -13,18 +12,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RestController
-public class AuthorController {
+public class BookController {
+    private final String endpoint = "/books";
+    private final Logger logger = Logger.getLogger(BookController.class.getName());
+    private final BookDao bookDao;
 
-    private final String endpoint = "/authors";
-    private final Logger logger = Logger.getLogger(AuthorController.class.getName());
-    private final AuthorDao authorDao;
-
-    public AuthorController(Configuration jooqConfiguration) {
-        this.authorDao = new AuthorDao(jooqConfiguration);
+    public BookController(Configuration jooqConfiguration) {
+        this.bookDao = new BookDao(jooqConfiguration);
     }
 
     @GetMapping(endpoint)
-    public List<com.sithchallenge.demo.model.Author> allAuthors(){
+    public List<Book> allBooks(){
         logger.log(Level.INFO, "GET request - endpoint: '" + endpoint + "'");
 
         String methodName = new Object() {}
@@ -34,11 +32,11 @@ public class AuthorController {
 
         logAction(methodName);
 
-        return new AuthorDAO().getAll();
+        return this.bookDao.findAll();
     }
 
     @PostMapping(endpoint)
-    public Author newAuthor(@RequestBody Author newAuthor){
+    public Book newBook(@RequestBody Book newBook){
         logger.log(Level.INFO, "POST request - endpoint: '" + endpoint + "'");
 
         String methodName = new Object() {}
@@ -48,16 +46,16 @@ public class AuthorController {
 
         logAction(methodName);
 
-        if(this.authorDao.existsById(newAuthor.getId())){
-            throw new ResourceDuplicateException("Resource with id " + newAuthor.getId() + "is already on database");
+        if(this.bookDao.existsById(newBook.getId())){
+            throw new ResourceDuplicateException("Resource with id " + newBook.getId() + "is already on database");
         }
 
-        this.authorDao.insert(newAuthor);
-        return newAuthor;
+        this.bookDao.insert(newBook);
+        return newBook;
     }
 
     @GetMapping(endpoint + "/{id}")
-    public Author getAuthor(@PathVariable int id){
+    public Book getBook(@PathVariable int id){
         logger.log(Level.INFO, "GET request - endpoint: '" + endpoint + "/" + id + "'");
 
         String methodName = new Object() {}
@@ -67,17 +65,17 @@ public class AuthorController {
 
         logAction(methodName);
 
-        Author author = this.authorDao.fetchOneById(id);
+        Book author = this.bookDao.fetchOneById(id);
 
         if(author == null){
             throw new ResourceNotFoundException("Couldn't find resource with id " + id);
         }
 
-        return this.authorDao.fetchOneById(id);
+        return this.bookDao.fetchOneById(id);
     }
 
     @PutMapping(endpoint + "/{id}")
-    public Author updateAuthor(@RequestBody Author newAuthor, @PathVariable int id){
+    public Book updateBook(@RequestBody Book newBook, @PathVariable int id){
         logger.log(Level.INFO, "PUT request - endpoint: '" + endpoint + "/" + id + "'");
 
         String methodName = new Object() {}
@@ -86,14 +84,14 @@ public class AuthorController {
                 .getName();
 
         logAction(methodName);
-        newAuthor.setId(id);
+        newBook.setId(id);
 
-        this.authorDao.update(newAuthor);
-        return newAuthor;
+        this.bookDao.update(newBook);
+        return newBook;
     }
 
     @DeleteMapping(endpoint + "/{id}")
-    public void deleteAuthor(@PathVariable int id){
+    public void deleteBook(@PathVariable int id){
         logger.log(Level.INFO, "DELETE request - endpoint: '" + endpoint + "/" + id + "'");
 
         String methodName = new Object() {}
@@ -103,7 +101,7 @@ public class AuthorController {
 
         logAction(methodName);
 
-        this.authorDao.deleteById(id);
+        this.bookDao.deleteById(id);
     }
 
     private void logAction(String actionName){
